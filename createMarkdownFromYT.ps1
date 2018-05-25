@@ -15,7 +15,12 @@ Function Remove-InvalidFileNameChars {
   
     $invalidChars = [IO.Path]::GetInvalidFileNameChars() -join ''
     $re = "[{0}]" -f [RegEx]::Escape($invalidChars)
-    return ($Name -replace $re)
+    $return = ($Name -replace $re)
+    $return = $return -replace ',', ''
+    $return = $return -replace '&', ""
+    $return = $return -replace '|', ""
+    
+    $return
   }
 function Invoke-HTMLEncode
 { #https://stackoverflow.com/questions/2779594/alternative-to-system-web-httputility-htmlencode-decode
