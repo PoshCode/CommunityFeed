@@ -76,6 +76,7 @@ foreach($u in $userGroups)
         remove-item .\$userGroupFile
     }
     new-item $userGroupFile -Force
+    "#### $usergroupFolder Links"| add-content .\$userGroupFile -Encoding UTF8
     $links | Add-Content .\$userGroupFile -Encoding UTF8
 }
 
