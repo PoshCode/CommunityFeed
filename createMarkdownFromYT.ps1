@@ -50,7 +50,18 @@ foreach($u in $userGroups)
     "    - $(New-MDLink -text "$($u1[0])" -link ($userGroupFile -replace ' ','%20'))"| add-content .\toc.md  -Encoding UTF8
     #$crlf | add-content .\toc.md
     $siteAuthor = $feed | Select-Object -first 1
-    New-MDLink -Text $siteAuthor.author.name -Link $siteAuthor.author.uri | add-content .\usergroups.md -Encoding UTF8
+    if($u1[1] -match 'playlist_id=')
+    {
+      $siteAuthorText = $u1[0]
+      $playlistId = ($u1[1] -split 'playlist_id=')[1]
+      $siteAuthorLink = "https://www.youtube.com/results?search_query=$playlistid "
+    }
+    else {
+      $siteAuthorText = $siteAuthor.author.name
+      $siteAuthorLink = $siteAuthor.author.uri
+    }
+    
+    New-MDLink -Text $siteAuthorText -Link $siteAuthorLink | add-content .\usergroups.md -Encoding UTF8
     $crlf|Add-content .\usergroups.md -Encoding UTF8
     $Links = @()
     
