@@ -1,4 +1,4 @@
-param($outDirectory = 'C:\inetpub\miis', $groupList = 'ps:\usergroup\userGroupList.txt')
+param($outDirectory = 'mdsite:\', $groupList = 'ps:\usergroup\userGroupList.txt')
 
 #http://winstonfassett.com/blog/2010/09/21/html-to-text-conversion-in-powershell/   
 #youtube feed https://support.google.com/youtube/answer/3250431?hl=en
