@@ -48,7 +48,8 @@ foreach($u in $userGroups)
     $feed = Invoke-RestMethod -uri $u1[1]
     "    - $(New-MDLink -text "$($u1[0])" -link ($userGroupFile -replace ' ','%20'))"| add-content .\toc.md  -Encoding UTF8
     #$crlf | add-content .\toc.md
-    New-MDLink -Text $feed[0].author.name -Link $feed[0].author.uri | add-content .\usergroups.md -Encoding UTF8
+    $siteAuthor = $feed | Select-Object -first 1
+    New-MDLink -Text $siteAuthor.author.name -Link $siteAuthor.author.uri | add-content .\usergroups.md -Encoding UTF8
     $crlf|Add-content .\usergroups.md
     $Links = @()
     
