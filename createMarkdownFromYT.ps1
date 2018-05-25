@@ -64,8 +64,9 @@ foreach($u in $userGroups)
       New-Item $filename -Force
       $topicTitle = New-MDParagraph -Lines $data.entry.group.description
       $speakerThumbNail = new-mdimage -source $data.entry.group.thumbnail.url -Title $data.entry.group.title -AltText $data.entry.group.title  -Link "$($data.entry.id -replace 'yt:video:','https://www.youtube.com/watch?v=')"  #$data.entry.group.content.url
-      New-MDHeader -Text $data.entry.group.title | add-content .\$filename -Encoding UTF8
+      New-MDHeader -Text $data.entry.group.title -level 4 | add-content .\$filename -Encoding UTF8
       $speakerThumbNail | add-content .\$filename -Encoding UTF8
+      $crlf|Add-content .\$filename -Encoding UTF8
       $topicTitle| Add-Content .\$filename -Encoding UTF8
       $file = $filename -replace '\\','/'
       $links +=  new-mdlink -text $data.entry.group.title -link "$($file -replace ' ','%20')"
