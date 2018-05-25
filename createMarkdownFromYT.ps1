@@ -35,7 +35,7 @@ if(test-path .\toc.md)
   new-item .\toc.md
   "#### PowerShell UserGroup Links" | add-content .\toc.md  -Encoding UTF8 
 
-  "- $(new-mdlink -text "User Groups" -link usergroups.md)" | add-content .\toc.md  -Encoding UTF8
+  "- $(new-mdlink -text 'User Groups' -link usergroups.md)" | add-content .\toc.md  -Encoding UTF8
 
 }
 New-MDHeader -text "PowerShell User Groups" | set-Content .\usergroups.md
