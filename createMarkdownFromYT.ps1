@@ -38,8 +38,8 @@ if(test-path .\toc.md)
   "- $(new-mdlink -text 'User Groups' -link usergroups.md)" | add-content .\toc.md  -Encoding UTF8
 
 }
-New-MDHeader -text "PowerShell User Groups" | set-Content .\usergroups.md
-$crlf| add-content .\usergroups.md
+New-MDHeader -text "PowerShell User Groups" | set-Content .\usergroups.md -Encoding UTF8
+$crlf| add-content .\usergroups.md -Encoding UTF8
 foreach($u in $userGroups)
 {
     $u1 = $u -split ','
@@ -51,7 +51,7 @@ foreach($u in $userGroups)
     #$crlf | add-content .\toc.md
     $siteAuthor = $feed | Select-Object -first 1
     New-MDLink -Text $siteAuthor.author.name -Link $siteAuthor.author.uri | add-content .\usergroups.md -Encoding UTF8
-    $crlf|Add-content .\usergroups.md
+    $crlf|Add-content .\usergroups.md -Encoding UTF8
     $Links = @()
     
     foreach ($f in $feed)
@@ -64,7 +64,7 @@ foreach($u in $userGroups)
       New-Item $filename -Force
       $topicTitle = New-MDParagraph -Lines $data.entry.group.description
       $speakerThumbNail = new-mdimage -source $data.entry.group.thumbnail.url -Title $data.entry.group.title -AltText $data.entry.group.title  -Link "$($data.entry.id -replace 'yt:video:','https://www.youtube.com/watch?v=')"  #$data.entry.group.content.url
-      New-MDHeader -Text $data.entry.group.title | add-content .\$filename
+      New-MDHeader -Text $data.entry.group.title | add-content .\$filename -Encoding UTF8
       $speakerThumbNail | add-content .\$filename -Encoding UTF8
       $topicTitle| Add-Content .\$filename -Encoding UTF8
       $file = $filename -replace '\\','/'
