@@ -1,4 +1,4 @@
-#param($youtubeLink = 'https://www.youtube.com/feeds/videos.xml?channel_id=UCMhQH-yJlr4_XHkwNunfMog')
+param($outDirectory = 'C:\inetpub\miis', $groupList = 'ps:\usergroup\userGroupList.txt')
 
 #http://winstonfassett.com/blog/2010/09/21/html-to-text-conversion-in-powershell/   
 #youtube feed https://support.google.com/youtube/answer/3250431?hl=en
@@ -22,72 +22,21 @@ Function Remove-InvalidFileNameChars {
     
     $return
   }
-function Invoke-HTMLEncode
-{ #https://stackoverflow.com/questions/2779594/alternative-to-system-web-httputility-htmlencode-decode
 
-  param($string)
-  if([string]::isNullorEmpty($string))
-  { 
-   $return = $null
-  }
-  $result = [system.text.stringbuilder]::new($string.length)
-  foreach($ch in $string.ToCharArray()) 
-  {
-    if([byte][char]$ch -le [byte][char]'>')
-    {
-     switch ($ch)
-     {
-       '<' {
-         $result.append("&lt;") | out-null
-         break;
-       }
-       '>' {
-        $result.append("&gt;")| out-null
-        break;
-      }
-      '"' {
-        $result.append("&quot;")| out-null
-        break;
-      }
-      '&'{
-        $result.append("&amp;")| out-null
-        break;
-      }
-      ' '{
-        $result.Append("%20;")|out-null
-      }
-      default {
-        $result.append($ch)| out-null
-        break;
-      }
-     } 
-    }
-    elseif([byte][char]$ch -ge 160 -and [byte][char]$ch -lt 256)
-    {
-      #result.Append("&#").Append(((int)ch).ToString(CultureInfo.InvariantCulture)).Append(';');
-      $result.append("&#").append(([byte][char]$ch).toString([System.Globalization.CultureInfo]::InvariantCulture)).append(';') | out-null
-    }
-    else
-    {
-      $result.Append($ch) | out-null
-    }
-  }
-  $result.ToString()
-}
 Import-Module  MarkdownPS
 $crlf = "`r"
-$userGroups = get-content ps:\usergroup\usergrouplist.txt
+$userGroups = get-content $groupList
 push-location
-cd C:\inetpub\miis
+cd $outdirectory
 write-debug 'create usergroups file'
 if(test-path .\toc.md)
 {
   remove-item .\toc.md
   new-item .\toc.md
   "#### PowerShell UserGroup Links" | add-content .\toc.md  -Encoding UTF8 
-  #$crlf | add-content .\toc.md 
+
   "- $(new-mdlink -text "User Groups" -link usergroups.md)" | add-content .\toc.md  -Encoding UTF8
-  #$crlf | add-content .\toc.md
+
 }
 New-MDHeader -text "PowerShell User Groups" | set-Content .\usergroups.md
 $crlf| add-content .\userGroupList.txt
@@ -111,7 +60,7 @@ foreach($u in $userGroups)
       {remove-item $filename -Force}
       New-Item $filename -Force
       $topicTitle = New-MDParagraph -Lines $data.entry.group.description
-      $speakerThumbNail = new-mdimage -source $data.entry.group.thumbnail.url -Title $data.entry.group.title -AltText $data.entry.group.title  -Link $data.entry.group.content.url
+      $speakerThumbNail = new-mdimage -source $data.entry.group.thumbnail.url -Title $data.entry.group.title -AltText $data.entry.group.title  -Link "$($data.entry.id -replace 'yt:video:','https://www.youtube.com/watch?v=')"  #$data.entry.group.content.url
       New-MDHeader -Text $data.entry.group.title | add-content .\$filename
       $speakerThumbNail | add-content .\$filename -Encoding UTF8
       $topicTitle| Add-Content .\$filename -Encoding UTF8
@@ -127,4 +76,4 @@ foreach($u in $userGroups)
 }
 
 pop-location
-#$unicode = "[^\u0000-\u007F]"
+
