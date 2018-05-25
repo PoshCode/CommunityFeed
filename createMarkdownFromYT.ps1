@@ -39,7 +39,7 @@ if(test-path .\toc.md)
 
 }
 New-MDHeader -text "PowerShell User Groups" | set-Content .\usergroups.md
-$crlf| add-content .\userGroupList.txt
+$crlf| add-content .\usergroups.md
 foreach($u in $userGroups)
 {
     $u1 = $u -split ','
