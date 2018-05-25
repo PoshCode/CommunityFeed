@@ -43,6 +43,7 @@ $crlf| add-content .\usergroups.md
 foreach($u in $userGroups)
 {
     $u1 = $u -split ','
+    $usergroupFolder = ( ("$($U1[0])") -replace '"','')
     $userGroupFile =Remove-InvalidFileNameChars ( ("$($U1[0]).md") -replace '"','')
     
     $feed = Invoke-RestMethod -uri $u1[1]
@@ -57,6 +58,7 @@ foreach($u in $userGroups)
     {
       [xml]$data = $f.OuterXML
       $filename = Remove-InvalidFileNameChars "$($data.entry.group.title).md"
+      $filename = "$usergroupfolder\$filename"
       if(test-path $filename)
       {remove-item $filename -Force}
       New-Item $filename -Force
@@ -65,7 +67,8 @@ foreach($u in $userGroups)
       New-MDHeader -Text $data.entry.group.title | add-content .\$filename
       $speakerThumbNail | add-content .\$filename -Encoding UTF8
       $topicTitle| Add-Content .\$filename -Encoding UTF8
-      $links +=  new-mdlink -text $data.entry.group.title -link "$($filename -replace ' ','%20')"
+      $file = $filename -replace '\\','/'
+      $links +=  new-mdlink -text $data.entry.group.title -link "$($file -replace ' ','%20')"
       $links += "`r`n"
     }
     if(test-path .\$userGroupFile )
