@@ -16,26 +16,8 @@ param(
     # The input file containing a list of YouTube feeds
     $groupList = "$PSScriptRoot\UserGroupList.txt"
 )
-
-Function Remove-InvalidFileNameChars {
-    param(
-      [Parameter(Mandatory=$true,
-        Position=0,
-        ValueFromPipeline=$true,
-        ValueFromPipelineByPropertyName=$true)]
-      [String]$Name
-    )
-
-    $invalidChars = [IO.Path]::GetInvalidFileNameChars() -join ''
-    $re = "[{0}]" -f [RegEx]::Escape($invalidChars)
-    $return = ($Name -replace $re)
-    $return = $return -replace ',', ''
-    $return = $return -replace '&', ""
-    $return = $return -replace '|', ""
-
-    $return
-  }
-
+# Temporarily dot-sourcing while converting
+. $PSScriptRoot\Source\ConvertTo-FileName.ps1
 
 $userGroups = get-content $groupList
 push-location
