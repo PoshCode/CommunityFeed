@@ -14,12 +14,13 @@ param(
     $outDirectory = 'mdsite:\',
 
     # The input file containing a list of YouTube feeds
-    $groupList = "$PSScriptRoot\UserGroupList.txt"
+    $groupList = "$PSScriptRoot\UserGroupList.csv"
 )
 # Temporarily dot-sourcing while converting
 . $PSScriptRoot\Source\ConvertTo-FileName.ps1
 
-$userGroups = get-content $groupList
+$userGroups = Import-Csv $groupList
+
 push-location
 cd $outdirectory
 write-debug 'create usergroups file'
@@ -31,22 +32,22 @@ if(test-path .\toc.md)
   "- [User Groups](usergroups.md)" | add-content .\toc.md  -Encoding UTF8
 
 }
+
 "# PowerShell User Groups" | set-Content .\usergroups.md -Encoding UTF8
 add-content "" .\usergroups.md -Encoding UTF8
 foreach($u in $userGroups)
 {
-    $u1 = $u -split ','
-    $usergroupFolder = ( ("$($U1[0])") -replace '"','')
-    $userGroupFile = Remove-InvalidFileNameChars ( ("$($U1[0]).md") -replace '"','')
+    $usergroupFolder = ( ("$($U.Name)") -replace '"','')
+    $userGroupFile = Remove-InvalidFileNameChars ( ("$($U.Name).md") -replace '"','')
 
-    $feed = Invoke-RestMethod -uri $u1[1]
-    add-content .\toc.md "    - [$($u1[0])]($($userGroupFile -replace ' ','%20'))" -Encoding UTF8
+    $feed = Invoke-RestMethod -uri $u.Url
+    add-content .\toc.md "    - [$($U.Name)]($($userGroupFile -replace ' ','%20'))" -Encoding UTF8
     # add-content "" .\toc.md
     $siteAuthor = $feed | Select-Object -first 1
-    if($u1[1] -match 'playlist_id=')
+    if($u.Url -match 'playlist_id=')
     {
-      $siteAuthorText = $u1[0]
-      $playlistId = ($u1[1] -split 'playlist_id=')[1]
+      $siteAuthorText = $U.Name
+      $playlistId = ($u.Url -split 'playlist_id=')[1]
       $siteAuthorLink = "https://www.youtube.com/results?search_query=$playlistid "
     }
     else {
