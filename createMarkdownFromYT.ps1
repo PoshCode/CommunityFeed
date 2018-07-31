@@ -18,6 +18,7 @@ param(
 )
 # Temporarily dot-sourcing while converting
 . $PSScriptRoot\Source\ConvertTo-FileName.ps1
+. $PSScriptRoot\Source\Convert-Entry.ps1
 
 $userGroups = Import-Csv $groupList
 
@@ -32,8 +33,8 @@ if(test-path .\toc.md)
 
 }
 
-"# PowerShell User Groups" | set-Content .\usergroups.md -Encoding UTF8
-add-content "" .\usergroups.md -Encoding UTF8
+"# PowerShell User Groups`n" | set-Content .\usergroups.md -Encoding UTF8
+
 foreach($u in $userGroups)
 {
     $usergroupFolder = ( ("$($U.Name)") -replace '"','')
@@ -56,32 +57,19 @@ foreach($u in $userGroups)
 
     add-content .\usergroups.md "[$siteAuthorText]($siteAuthorLink)" -Encoding UTF8
     Add-Content .\usergroups.md "" -Encoding UTF8
-    $Links = @()
+    $Links = $Feed | Convert-Entry -Group $U.Name | ForEach-Object { "- [{0}]({1})" -f $_.Title, ($_.Path -replace '\\','/' -replace ' ', '%20') }
 
-    foreach ($f in $feed)
+    if(test-path $userGroupFile )
     {
-      [xml]$data = $f.OuterXML
-      $filename = ConvertTo-FileName "$($data.entry.group.title).md"
-      $filename = "$usergroupfolder\$filename"
-      if(test-path $filename)
-      {remove-item $filename -Force}
-      New-Item $filename -Force
-      $topicTitle = "`n`n" + $($data.entry.group.description -join "`n")
-      $speakerThumbNail = "[![$($data.entry.group.title)]($($data.entry.group.thumbnail.url) `"$($data.entry.group.title)`")](https://www.youtube.com/watch?v=$($data.entry.id -replace 'yt:video:'))"  #$data.entry.group.content.url
-      add-content .\$filename ("#### " + $data.entry.group.title) -Encoding UTF8
-      add-content .\$filename $speakerThumbNail -Encoding UTF8
-      Add-content .\$filename "" -Encoding UTF8
-      Add-Content .\$filename $topicTitle  -Encoding UTF8
-      $file = $filename -replace '\\','/'
-      $links += "[$($data.entry.group.title)]($($file -replace ' ','%20'))`n"
-    }
-    if(test-path .\$userGroupFile )
-    {
-        remove-item .\$userGroupFile
+        remove-item $userGroupFile
     }
     new-item $userGroupFile -Force
-    add-content .\$userGroupFile "#### $usergroupFolder Links" -Encoding UTF8
-    Add-Content .\$userGroupFile $links -Encoding UTF8
+    Set-Content $userGroupFile @"
+## $usergroupFolder Links
+
+$($Links -join "`n")
+"@ -Encoding UTF8
+
 }
 
 pop-location
