@@ -11,7 +11,7 @@
 [CmdletBinding()]
 param(
     # The output location where markdown will be output
-    $outDirectory = 'mdsite:\',
+    $outDirectory = "$PSScriptRoot\Output",
 
     # The input file containing a list of YouTube feeds
     $groupList = "$PSScriptRoot\UserGroupList.csv"
@@ -21,8 +21,7 @@ param(
 
 $userGroups = Import-Csv $groupList
 
-push-location
-cd $outdirectory
+push-location $outdirectory
 write-debug 'create usergroups file'
 if(test-path .\toc.md)
 {
@@ -43,7 +42,7 @@ foreach($u in $userGroups)
     $feed = Invoke-RestMethod -uri $u.Url
     add-content .\toc.md "    - [$($U.Name)]($($userGroupFile -replace ' ','%20'))" -Encoding UTF8
     # add-content "" .\toc.md
-    $siteAuthor = $feed | Select-Object -first 1
+    $siteAuthor = $feed[0]
     if($u.Url -match 'playlist_id=')
     {
       $siteAuthorText = $U.Name
