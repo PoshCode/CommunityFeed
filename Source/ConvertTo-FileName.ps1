@@ -9,6 +9,6 @@ function ConvertTo-FileName {
         $characters = [RegEx]::new("[$characters]", "Compiled")
     }
     process {
-        $Name -replace $characters
+        ($Name -replace $characters).TrimEnd(".") -replace '\s+','-'
     }
 }

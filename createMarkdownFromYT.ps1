@@ -11,66 +11,20 @@
 [CmdletBinding()]
 param(
     # The output location where markdown will be output
-    $outDirectory = "$PSScriptRoot\Output",
+    $Path = "$PSScriptRoot\Output",
 
     # The input file containing a list of YouTube feeds
     $groupList = "$PSScriptRoot\UserGroupList.csv"
 )
+
 # Temporarily dot-sourcing while converting
 . $PSScriptRoot\Source\ConvertTo-FileName.ps1
 . $PSScriptRoot\Source\Convert-Entry.ps1
+. $PSScriptRoot\Source\Update-Feed.ps1
+. $PSScriptRoot\Source\Update-FeedList.ps1
 
-$userGroups = Import-Csv $groupList
-
-push-location $outdirectory
-write-debug 'create usergroups file'
-if(test-path .\toc.md)
-{
-  remove-item .\toc.md
-  new-item .\toc.md
-  "#### PowerShell UserGroup Links" | add-content .\toc.md  -Encoding UTF8
-  "- [User Groups](usergroups.md)" | add-content .\toc.md  -Encoding UTF8
-
+if(!(Test-Path $Path)) {
+    New-Item $Path -ItemType Directory -Confirm
 }
 
-"# PowerShell User Groups`n" | set-Content .\usergroups.md -Encoding UTF8
-
-foreach($u in $userGroups)
-{
-    $usergroupFolder = ( ("$($U.Name)") -replace '"','')
-    $userGroupFile = ConvertTo-FileName ( ("$($U.Name).md") -replace '"','')
-
-    $feed = Invoke-RestMethod -uri $u.Url
-    add-content .\toc.md "    - [$($U.Name)]($($userGroupFile -replace ' ','%20'))" -Encoding UTF8
-    # add-content "" .\toc.md
-    $siteAuthor = $feed[0]
-    if($u.Url -match 'playlist_id=')
-    {
-      $siteAuthorText = $U.Name
-      $playlistId = ($u.Url -split 'playlist_id=')[1]
-      $siteAuthorLink = "https://www.youtube.com/results?search_query=$playlistid "
-    }
-    else {
-      $siteAuthorText = $siteAuthor.author.name
-      $siteAuthorLink = $siteAuthor.author.uri
-    }
-
-    add-content .\usergroups.md "[$siteAuthorText]($siteAuthorLink)" -Encoding UTF8
-    Add-Content .\usergroups.md "" -Encoding UTF8
-    $Links = $Feed | Convert-Entry -Group $U.Name | ForEach-Object { "- [{0}]({1})" -f $_.Title, ($_.Path -replace '\\','/' -replace ' ', '%20') }
-
-    if(test-path $userGroupFile )
-    {
-        remove-item $userGroupFile
-    }
-    new-item $userGroupFile -Force
-    Set-Content $userGroupFile @"
-## $usergroupFolder Links
-
-$($Links -join "`n")
-"@ -Encoding UTF8
-
-}
-
-pop-location
-
+Update-FeedList $Path $groupList

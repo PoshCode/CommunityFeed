@@ -9,14 +9,17 @@ function Convert-Entry {
             if(!$_.title) { throw "The entry doesn't have a title" }
             # validate <media:group
             if(!$_.group -or $_.group.NamespaceURI -ne "http://search.yahoo.com/mrss/") { throw "The entry doesn't have a media:group" }
-            if(!$_.group.description) { throw "The entry doesn't have a description" }
+            if(!$_.group.description) { Write-Warning "The '$GroupName\$($_.Title)' entry doesn't have a description" }
+            $true
         })]
         [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [System.Xml.XmlElement]$Entry
     )
     begin {
+        $LastAuthor = $null
+        # Create the folder if it's missing, but don't remove old entries
         if(!(Test-Path $GroupName -PathType Container)) {
-            $GroupName = ConvertTo-FileName $GroupName
+            $GroupName = (ConvertTo-FileName $GroupName) -replace '\s+'
             if(!(Test-Path $GroupName -PathType Container)) {
                 $null = New-Item -Path $GroupName -ItemType Directory
             }
@@ -27,15 +30,12 @@ function Convert-Entry {
         $Title = ConvertTo-FileName $Entry.title
         $FilePath = (Join-Path $GroupName $Title) + ".md"
 
-        # return an object representing this entry
-        [PSCustomObject]@{
-            Title = $Entry.title
-            Path = $FilePath
-            Author = [PSCustomObject]@{
-                Name = $Entry.Author.Name
-                Uri = $Entry.Author.Uri
-            }
+        # Output markdown for the index page
+        if ($Entry.Author.Uri -ne $LastAuthor) {
+            $LastAuthor = $Entry.Author.Uri
+            "`n## [Videos by $($Entry.Author.name)]($($Entry.Author.uri))`n`n"
         }
+        "- [$($Entry.title)]($($FilePath -replace '\\','/'))`n"
 
         $thumbnail = "![$($Entry.title)]($($Entry.group.thumbnail.url) `"$($Entry.title)`")"
 
