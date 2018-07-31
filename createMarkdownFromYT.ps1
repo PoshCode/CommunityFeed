@@ -38,7 +38,7 @@ add-content "" .\usergroups.md -Encoding UTF8
 foreach($u in $userGroups)
 {
     $usergroupFolder = ( ("$($U.Name)") -replace '"','')
-    $userGroupFile = Remove-InvalidFileNameChars ( ("$($U.Name).md") -replace '"','')
+    $userGroupFile = ConvertTo-FileName ( ("$($U.Name).md") -replace '"','')
 
     $feed = Invoke-RestMethod -uri $u.Url
     add-content .\toc.md "    - [$($U.Name)]($($userGroupFile -replace ' ','%20'))" -Encoding UTF8
@@ -62,7 +62,7 @@ foreach($u in $userGroups)
     foreach ($f in $feed)
     {
       [xml]$data = $f.OuterXML
-      $filename = Remove-InvalidFileNameChars "$($data.entry.group.title).md"
+      $filename = ConvertTo-FileName "$($data.entry.group.title).md"
       $filename = "$usergroupfolder\$filename"
       if(test-path $filename)
       {remove-item $filename -Force}
